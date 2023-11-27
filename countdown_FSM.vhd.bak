@@ -1,0 +1,120 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
+USE work.my_pkg.ALL;
+----------------------------------------
+ENTITY main_FSM IS
+	PORT 	(	clk				:	IN	STD_LOGIC;
+				rst				:	IN	STD_LOGIC;
+				ena				:	IN	STD_LOGIC;
+				tick_timer_1s	:	IN	STD_LOGIC;
+				wr_en			:	OUT	STD_LOGIC;
+				w_addr_j		:	OUT	STD_LOGIC_VECTOR( 3 DOWNTO 0 );
+				w_addr_i		:	OUT	STD_LOGIC_VECTOR( 2 DOWNTO 0 );
+				w_data			:	OUT	STD_LOGIC);
+END ENTITY;
+----------------------------------------
+ARCHITECTURE arch OF main_FSM IS
+	
+	SIGNAL	anim_imgs	:	imgs_mtx( 0 TO 2 );
+
+	TYPE state IS (st0, st1, st2);
+	SIGNAL pr_state, nx_state	:	state;
+	
+BEGIN
+	
+	anim_imgs(0)	<=	(	conv_slv("0000000000000000"),
+							conv_slv("0001000000010000"),
+							conv_slv("0001100000011000"),
+							conv_slv("0001010000010100"),
+							conv_slv("0001000000010000"),
+							conv_slv("0001000000010000"),
+							conv_slv("0011110000111100"),
+							conv_slv("0000000000000000"));
+	
+	anim_imgs(1)	<= (	conv_slv("0000000000000000"),
+							conv_slv("0011110000111100"),
+							conv_slv("0010000000100000"),
+							conv_slv("0011110000111100"),
+							conv_slv("0000010000000100"),
+							conv_slv("0000010000000100"),
+							conv_slv("0011110000111100"),
+							conv_slv("0000000000000000"));
+	
+	anim_imgs(2)	<= (	conv_slv("0000000000000000"),
+							conv_slv("0011110000111100"),
+							conv_slv("0010000000100000"),
+							conv_slv("0011110000111100"),
+							conv_slv("0010000000100000"),
+							conv_slv("0010000000100000"),
+							conv_slv("0011110000111100"),
+							conv_slv("0000000000000000"));
+	
+	-------------------------------------------------------------
+	--                 LOWER SECTION OF FSM                    --
+	-------------------------------------------------------------
+	sequential: PROCESS(rst, ini_st, clk)
+	BEGIN
+		IF (rst = '1') THEN
+			pr_state	<=	st0;
+		ELSIF (rising_edge(clk)) THEN
+			pr_state	<=	nx_state;
+		END IF;
+	END PROCESS sequential;
+	
+	-------------------------------------------------------------
+	--                 UPPER SECTION OF FSM                    --
+	-------------------------------------------------------------
+	combinational: PROCESS(str_btn, col_der, col_izq, max_der, max_izq, tick_timer_3s, tick_timer_1s, tick_timer_g, tick_timer_w)
+	BEGIN
+		CASE pr_state IS
+			WHEN st0	=>
+			
+				frame3_print:	ENTITY work.imageManagement
+				PORT MAP(clk      =>	clk,
+						rst      =>	rst,
+						ena      =>	ena,
+						imageIn	=>	anim_imgs(0),
+						wr_en		=>	wr_en,
+						w_addr_j	=>	w_addr_j,
+						w_addr_i	=>	w_addr_i,
+						w_data	=>	w_data);
+					
+				IF (tick_timer_1s = '1') THEN
+					nx_state	<= st1;
+				ELSE
+					nx_state	<= st0;
+				END IF;
+			WHEN st1	=>
+			
+				frame2_print:	ENTITY work.imageManagement
+				PORT MAP(clk      =>	clk,
+						rst      =>	rst,
+						ena      =>	ena,
+						imageIn	=>	anim_imgs(1),
+						wr_en		=>	wr_en,
+						w_addr_j	=>	w_addr_j,
+						w_addr_i	=>	w_addr_i,
+						w_data	=>	w_data);
+				
+				IF (tick_timer_1s = '1') THEN
+					nx_state	<= st2;
+				ELSE
+					nx_state	<= st1;
+				END IF;
+				
+			WHEN st2	=>
+			
+				frame1_print:	ENTITY work.imageManagement
+				PORT MAP(clk      =>	clk,
+						rst      =>	rst,
+						ena      =>	ena,
+						imageIn	=>	anim_imgs(2),
+						wr_en		=>	wr_en,
+						w_addr_j	=>	w_addr_j,
+						w_addr_i	=>	w_addr_i,
+						w_data	=>	w_data);
+				
+		END CASE;
+	END PROCESS combinational;
+END ARCHITECTURE;

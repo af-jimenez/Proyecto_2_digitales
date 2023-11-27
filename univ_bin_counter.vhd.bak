@@ -1,0 +1,69 @@
+LIBRARY IEEE;
+USE ieee.std_logic_1164.all;
+USE ieee.numeric_std.all;
+
+ENTITY univ_bin_counter IS
+	GENERIC  (  N        :  INTEGER );
+	PORT     (  clk      :  IN     STD_LOGIC;
+					rst      :  IN     STD_LOGIC;
+					ena      :  IN     STD_LOGIC;
+					syn_clr  :  IN     STD_LOGIC;
+					load     :  IN     STD_LOGIC;
+					up       :  IN     STD_LOGIC;
+					d        :  IN     STD_LOGIC_VECTOR(N-1 DOWNTO 0);
+					max      :  IN     UNSIGNED(N-1 DOWNTO 0);
+					max_tick :  OUT    STD_LOGIC;
+				
+					min_tick :  OUT    STD_LOGIC:='0';
+					counter  :  OUT    STD_LOGIC_VECTOR(N-1 DOWNTO 0));
+END ENTITY;
+
+ARCHITECTURE rtl OF univ_bin_counter IS
+	CONSTANT ONES        :  UNSIGNED(N-1 DOWNTO 0)  := (OTHERS => '1');
+	CONSTANT ZEROS       :  UNSIGNED(N-1 DOWNTO 0)  := (OTHERS => '0');
+	
+	SIGNAL count_s       :  UNSIGNED(N-1 DOWNTO 0)	:= (OTHERS => '0');
+	SIGNAL count_next    :  UNSIGNED(N-1 DOWNTO 0)	:= (OTHERS => '0');
+	SIGNAL maxb				:	STD_LOGIC:='0';
+	SIGNAL minb				:	STD_LOGIC:='0';
+BEGIN
+		count_next  <=   (OTHERS =>   '0')  WHEN   syn_clr='1'           ELSE
+								unsigned(d)       WHEN   load ='1'             ELSE
+								count_s + 1       WHEN   (ena='1' AND up='1')  ELSE
+								count_s - 1       WHEN   (ena='1' AND up='0')  ELSE
+								count_s;
+		PROCESS(clk,rst,count_s,max)
+			VARIABLE temp    :   UNSIGNED(N-1 DOWNTO 0):= (OTHERS => '0');
+		BEGIN
+		
+			IF(count_s = max) THEN 
+			maxb <= '1';
+			else
+			maxb <= '0';
+			END IF;
+			IF(count_s = "0000") THEN 
+			minb <= '1';
+			elsE
+			minb <= '0';
+			END IF;
+			
+		    IF(rst='1' )  THEN 
+				temp  :=  (OTHERS => '0');
+				
+			 ELSIF (rising_edge(clk))  THEN 
+				 IF (ena='1') THEN
+						temp := count_next;
+						
+						IF(maxb='1')  THEN 
+						temp  :=  (OTHERS => '0');
+				 END IF;
+				 
+			END IF;
+			END IF;
+			counter    	<= STD_LOGIC_VECTOR(temp);
+			count_s  	<= temp;
+		END PROCESS;
+		
+		max_tick <= '1' WHEN  maxb='1'    ELSE '0';
+		min_tick <= '1' WHEN  minb='1'   ELSE '0';
+END ARCHITECTURE;

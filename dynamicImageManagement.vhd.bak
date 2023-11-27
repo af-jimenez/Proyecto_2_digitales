@@ -1,0 +1,105 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
+----------------------------------------
+ENTITY dynamicImageManagement IS
+	PORT	(	clk		:	IN		STD_LOGIC;
+				rst		:	IN		STD_LOGIC;
+				ena		:	IN		STD_LOGIC;
+				imageIn	:	IN		STD_LOGIC_VECTOR( 127 DOWNTO 0 );
+				wr_en		:	OUT	STD_LOGIC;
+				w_addr	:	OUT	STD_LOGIC_VECTOR( 6 DOWNTO 0 );
+				w_data	:	OUT	STD_LOGIC);
+END ENTITY;
+----------------------------------------
+ARCHITECTURE arch OF dynamicImageManagement IS
+
+	SIGNAL	w_addr_s	:	STD_LOGIC_VECTOR( 6 DOWNTO 0 );
+	SIGNAL	w_data_s	:	STD_LOGIC;
+	
+	SIGNAL	coor1_addr	:	STD_LOGIC_VECTOR( 6 DOWNTO 0 );
+	SIGNAL	coor2_addr	:	STD_LOGIC_VECTOR( 6 DOWNTO 0 );
+	SIGNAL	coor3_addr	:	STD_LOGIC_VECTOR( 6 DOWNTO 0 );
+	SIGNAL	coor4_addr	:	STD_LOGIC_VECTOR( 6 DOWNTO 0 );
+	SIGNAL	coor5_addr	:	STD_LOGIC_VECTOR( 6 DOWNTO 0 );
+	SIGNAL	coor6_addr	:	STD_LOGIC_VECTOR( 6 DOWNTO 0 );
+	SIGNAL	coor7_addr	:	STD_LOGIC_VECTOR( 6 DOWNTO 0 );
+
+BEGIN
+
+	coor1_addr	<=	STD_LOGIC_VECTOR(to_unsigned((to_integer(unsigned(y_1))*16)+to_integer(unsigned(x_1)), coor1_addr'LENGTH));
+	coor2_addr	<=	STD_LOGIC_VECTOR(to_unsigned((to_integer(unsigned(y_2))*16)+to_integer(unsigned(x_2)), coor2_addr'LENGTH));
+	coor3_addr	<=	STD_LOGIC_VECTOR(to_unsigned((to_integer(unsigned(y_3))*16)+to_integer(unsigned(x_3)), coor3_addr'LENGTH));
+	coor4_addr	<=	STD_LOGIC_VECTOR(to_unsigned((to_integer(unsigned(y_4))*16)+to_integer(unsigned(x_4)), coor4_addr'LENGTH));
+	coor5_addr	<=	STD_LOGIC_VECTOR(to_unsigned((to_integer(unsigned(y_5))*16)+to_integer(unsigned(x_5)), coor5_addr'LENGTH));
+	coor6_addr	<=	STD_LOGIC_VECTOR(to_unsigned((to_integer(unsigned(y_6))*16)+to_integer(unsigned(x_6)), coor6_addr'LENGTH));
+	coor7_addr	<=	STD_LOGIC_VECTOR(to_unsigned((to_integer(unsigned(y_7))*16)+to_integer(unsigned(x_7)), coor7_addr'LENGTH));
+
+	counterbits: ENTITY work.univ_bin_counter
+	GENERIC MAP(	N => 7	)
+	PORT MAP(	clk		=>	clk,
+					rst		=>	rst,
+					ena		=>	ena,
+					syn_clr	=>	'0',
+					load		=>	'0',
+					up			=>	'1',
+					max		=>	"1111111",
+					d			=>	"0000000",
+					counter	=>	w_addr_s);
+	
+	comp1: ENTITY work.nBitComparator
+	GENERIC MAP(	nBits	=>	7	)
+	PORT MAP(	A		=>	w_addr_s,
+					B		=>	coor1_addr,
+					sel	=>	'0',
+					eq		=>	);
+	
+	comp2: ENTITY work.nBitComparator
+	GENERIC MAP(	nBits	=>	7	)
+	PORT MAP(	A		=>	w_addr_s,
+					B		=>	coor2_addr,
+					sel	=>	'0',
+					eq		=>	);
+	
+	comp3: ENTITY work.nBitComparator
+	GENERIC MAP(	nBits	=>	7	)
+	PORT MAP(	A		=>	w_addr_s,
+					B		=>	coor3_addr,
+					sel	=>	'0',
+					eq		=>	);
+	
+	comp4: ENTITY work.nBitComparator
+	GENERIC MAP(	nBits	=>	7	)
+	PORT MAP(	A		=>	w_addr_s,
+					B		=>	coor4_addr,
+					sel	=>	'0',
+					eq		=>	);
+	
+	comp5: ENTITY work.nBitComparator
+	GENERIC MAP(	nBits	=>	7	)
+	PORT MAP(	A		=>	w_addr_s,
+					B		=>	coor5_addr,
+					sel	=>	'0',
+					eq		=>	);
+	
+	comp6: ENTITY work.nBitComparator
+	GENERIC MAP(	nBits	=>	7	)
+	PORT MAP(	A		=>	w_addr_s,
+					B		=>	coor6_addr,
+					sel	=>	'0',
+					eq		=>	);
+	
+	comp7: ENTITY work.nBitComparator
+	GENERIC MAP(	nBits	=>	7	)
+	PORT MAP(	A		=>	w_addr_s,
+					B		=>	coor7_addr,
+					sel	=>	'0',
+					eq		=>	);
+	
+	
+	
+	wr_en		<=	'1';
+	w_addr	<=	w_addr_s;
+	w_data	<=	w_data_s;
+
+END ARCHITECTURE;

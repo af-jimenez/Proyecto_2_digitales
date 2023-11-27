@@ -1,0 +1,15 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
+----------------------------------------
+ENTITY ledMatrixController IS
+	PORT	(	rst			:	IN		STD_LOGIC;
+				readyTimer	:	IN		STD_LOGIC;
+				ena			:	IN		STD_LOGIC;
+				led_state	:	IN		STD_LOGIC;
+				rd_addr		:	OUT	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
+				rows			:	OUT	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
+				cols			:	OUT	STD_LOGIC_VECTOR( 15 DOWNTO 0 ));
+END ledMatrixController;
+----------------------------------------
+ARCHITECTURE arch OF ledMatrixController IS

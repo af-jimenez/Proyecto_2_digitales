@@ -1,0 +1,61 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
+----------------------------------------
+ENTITY x_yController IS
+	PORT	(	clk	:	IN		STD_LOGIC;
+				rst	:	IN		STD_LOGIC;
+				ena	:	IN		STD_LOGIC;
+				cond1	:	IN		STD_LOGIC;
+				cond2	:	IN		STD_LOGIC;
+				cond3	:	IN		STD_LOGIC;
+				cond4	:	IN		STD_LOGIC;
+				cond5	:	IN		STD_LOGIC;
+				cond6	:	IN		STD_LOGIC;
+				cond7	:	IN		STD_LOGIC;
+				cond8	:	IN		STD_LOGIC;
+				x_sel	:	OUT	STD_LOGIC;
+				y_sel	:	OUT	STD_LOGIC_VECTOR( 1 DOWNTO 0 ));
+END ENTITY;
+----------------------------------------
+ARCHITECTURE arch OF x_yController IS
+
+	SIGNAL	en_x		:	STD_LOGIC;
+	SIGNAL	en_y	:	STD_LOGIC;
+	
+	SIGNAL	x_sel_s	:	STD_LOGIC;
+	SIGNAL	y_sel_s	:	STD_LOGIC_VECTOR(1 DOWNTO 0);
+
+BEGIN
+
+	en_x	<=	((cond1)OR(cond2)OR(cond3)OR(cond4)OR(cond5)OR(cond6))AND(ena);
+	
+	dff_xsel: ENTITY work.mydff
+	GENERIC MAP(	N => 1 )
+	PORT MAP(	clk		=>	clk,
+					rst		=>	rst,
+					ena		=>	en_x,
+					prn		=>	'0',
+					ini_st	=>	'0',
+					d			=>	NOT(x_sel_s),
+					q			=>	x_sel_s);
+	
+	x_sel	<=	x_sel_s;
+	
+	en_y	=>	(en_x OR cond7 OR cond8)AND(ena);
+	
+	encod_ysel: ENTITY work.p_encoder4_2
+	PORT MAP(	x	=>	('0')&(cond3 OR cond6 OR cond7)&(cond1 OR cond4 OR cond8)&(cond2 OR cond5),
+					y	=>	y_sel_s);
+	
+	dff_ysel: ENTITY work.mydff
+	GENERIC MAP( N => 2 )
+	PORT MAP(	clk		=>	clk,
+					rst		=>	rst,
+					ena		=>	en_y,
+					prn		=>	'0',
+					ini_st	=>	'0',
+					d			=>	y_sel_s,
+					q			=>	y_sel);
+
+END ARCHITECTURE;

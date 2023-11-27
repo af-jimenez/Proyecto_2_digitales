@@ -1,0 +1,26 @@
+LIBRARY IEEE;
+USE ieee.std_logic_1164.all;
+--------------------------------------
+ENTITY mux4_2 IS
+	
+	GENERIC(	N	:	INTEGER	:=	3);
+	PORT(	X1		:	IN		STD_LOGIC_VECTOR(N-1 DOWNTO 0);
+			X2		:	IN		STD_LOGIC_VECTOR(N-1 DOWNTO 0);
+			X3		:	IN		STD_LOGIC_VECTOR(N-1 DOWNTO 0);
+			X4		:	IN		STD_LOGIC_VECTOR(N-1 DOWNTO 0);
+			sel	:	IN		STD_LOGIC_VECTOR(1 DOWNTO 0);
+			Y		:	OUT	STD_LOGIC_VECTOR(N-1 DOWNTO 0));
+			
+END ENTITY;
+--------------------------------------
+ARCHITECTURE functional OF mux4_2 IS
+--------------------------------------
+BEGIN
+
+	WITH sel SELECT
+		Y	<=	X1	WHEN	"00",
+				X2	WHEN	"01",
+				X3	WHEN	"10",
+				X4	WHEN	OTHERS;
+	
+END ARCHITECTURE;

@@ -1,0 +1,36 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
+----------------------------------------
+ENTITY imageManagement IS
+	PORT	(	clk		:	IN		STD_LOGIC;
+				rst		:	IN		STD_LOGIC;
+				ena		:	IN		STD_LOGIC;
+				imageIn	:	IN		STD_LOGIC_VECTOR( 127 DOWNTO 0 );
+				wr_en		:	OUT	STD_LOGIC;
+				w_addr	:	OUT	STD_LOGIC_VECTOR( 6 DOWNTO 0 );
+				w_data	:	OUT	STD_LOGIC);
+END ENTITY;
+----------------------------------------
+ARCHITECTURE arch OF imageManagement IS
+
+	SIGNAL	w_addr_s	:	STD_LOGIC_VECTOR( 6 DOWNTO 0 );
+
+BEGIN
+
+	counterbits: ENTITY work.univ_bin_counter
+	GENERIC MAP(	N => 7	)
+	PORT MAP(	clk		=>	clk,
+					rst		=>	rst,
+					ena		=>	ena,
+					syn_clr	=>	'0',
+					load		=>	'0',
+					up			=>	'1',
+					max		=>	"1111111",
+					d			=>	"0000000",
+					counter	=>	w_addr_s);
+	
+	w_addr	<=	w_addr_s;
+	w_data	<=	imageIn(to_integer(unsigned(w_addr_s)));
+
+END ARCHITECTURE;
